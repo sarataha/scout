@@ -10,7 +10,7 @@ help: ## Display this help menu
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 build: ## Compile the scout binary
-	go build -o scout .
+	go build -o scout cmd/scout/main.go
 
 run: build ## Build and run scout locally
 	./scout

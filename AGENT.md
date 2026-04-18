@@ -3,15 +3,15 @@
 This document is intended for AI coding assistants working in the `scout` directory.
 
 ## Commands
-- **Build**: `go build -o scout .`
-- **Run**: `./scout`
-- **Format**: `go fmt ./...`
+- **Build**: `make build` or `go build -o scout cmd/scout/main.go`
+- **Run**: `make run` or `./scout`
+- **Format**: `make fmt` or `go fmt ./...`
 
 ## Project Context
 - **Description**: A dual-pane terminal UI file manager and previewer.
 - **Language**: Go
 - **Core Libraries**: `charm.land/bubbletea/v2`, `charm.land/lipgloss/v2`
-- **Architecture**: Single-file (`main.go`) Model-View-Update (MVU). See `SPEC.md` for full architectural details.
+- **Architecture**: Modular structure (`cmd/`, `internal/`) using Model-View-Update (MVU). See `SPEC.md` for full architectural details.
 
 ## Coding Conventions
 - Do not import external "UI components" or "bubbles" packages without explicit user permission. The current file list and preview panes are custom-built for explicit layout and scrolling control.
@@ -19,3 +19,4 @@ This document is intended for AI coding assistants working in the `scout` direct
 - Process execution (like launching `vim`) must use `tea.ExecProcess`.
 - Run `go build` after making changes to verify compilation. Use standard `go fmt` rules.
 - **Git Commits**: Do not commit code with co-authors.
+- **Aesthetics**: Prefer clean ASCII and Unicode characters over emoji for icons and UI elements to maintain a professional, high-contrast look.

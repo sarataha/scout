@@ -2,6 +2,8 @@
 
 *when you need a rapid intelligence overview of your environment, you call in a Scout.*
 
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
 ![Scout Demo](demo.gif)
 
 Scout is a fast, elegant, terminal-native file explorer designed for immediate situational awareness. It combines a high-performance dual-pane layout with real-time Git integration and rich previews to help you navigate your codebase with speed and precision.

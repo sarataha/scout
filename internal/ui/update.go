@@ -15,8 +15,13 @@ import (
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 
+	case filesystem.GitRefreshMsg:
+		m.GitStatus = msg.GitStatus
+		m.GitBranch = msg.GitBranch
+		return m, nil
+
 	case filesystem.TickMsg:
-		return m, tea.Batch(filesystem.DoTick(), filesystem.GetStats(m.Cwd))
+		return m, tea.Batch(filesystem.DoTick(), filesystem.GetStats(m.Cwd), m.RefreshGit())
 
 	case filesystem.StatsMsg:
 		m.Stats.CPU = msg.CPU
@@ -29,7 +34,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.StatusMsg = fmt.Sprintf("Error: %v", msg.Err)
 			return m, nil
 		}
-		m.Entries = msg.Entries
+		entries := msg.Entries
+		if !m.ShowHidden {
+			filtered := entries[:0]
+			for _, e := range entries {
+				if !strings.HasPrefix(e.Name, ".") {
+					filtered = append(filtered, e)
+				}
+			}
+			entries = filtered
+		}
+		m.Entries = entries
 		m.GitStatus = msg.GitStatus
 		m.GitBranch = msg.GitBranch
 		m.Err = nil
@@ -83,6 +98,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Preview = m.BuildPreview()
 			return m, nil
 
+		case "i":
+			m.ShowHidden = !m.ShowHidden
+			m.Cursor = 0
+			return m, m.LoadDir(m.Cwd)
+
+		case "tab":
+			m.ExplorerCollapsed = !m.ExplorerCollapsed
+			return m, nil
+
 		// Navigation: move cursor down
 		case "j", "down":
 			if m.FocusRight {
@@ -122,7 +146,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		// Navigation: go to parent directory or unfocus right pane
-		case "h", "left":
+		case "h", "left", "backspace":
 			if m.FocusRight {
 				m.FocusRight = false
 				return m, nil

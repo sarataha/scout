@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"charm.land/lipgloss/v2"
 )
@@ -18,7 +19,8 @@ func (m Model) RenderHeader() string {
 	memMB := float64(m.Stats.Mem) / 1024 / 1024
 
 	// Build stats string
-	statsStr := fmt.Sprintf("CPU: %.1f%%  MEM: %.1fMB", m.Stats.CPU, memMB)
+	now := time.Now()
+	statsStr := fmt.Sprintf("%s  CPU: %.1f%%  MEM: %.1fMB", now.Format("Mon 2006-01-02 15:04"), m.Stats.CPU, memMB)
 	right := dimStyle.Render(statsStr + " ")
 
 	// Calculate space between

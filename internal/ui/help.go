@@ -14,46 +14,46 @@ func (m Model) RenderHelp() string {
 	textColor := lipgloss.Color(t.Text)
 
 	titleStyle := lipgloss.NewStyle().Foreground(accentColor).Bold(true).MarginBottom(1)
-	keyStyle := lipgloss.NewStyle().Foreground(accentColor).Width(15)
+	keyStyle := lipgloss.NewStyle().Foreground(accentColor).Width(16)
 	descStyle := lipgloss.NewStyle().Foreground(textColor)
-	sectionStyle := lipgloss.NewStyle().MarginTop(1)
+	sectionStyle := lipgloss.NewStyle().Foreground(dimColor).MarginBottom(1)
+	colStyle := lipgloss.NewStyle().PaddingRight(4)
 
-	header := titleStyle.Render(fmt.Sprintf("Scout Help - %s Theme (press any key to dismiss)", t.Name))
+	header := titleStyle.Render(fmt.Sprintf("scout help  -  %s theme  (press any key to dismiss)", t.Name))
 
-	hotkeys := []string{
-		keyStyle.Render("j, down") + descStyle.Render("Move cursor down / Scroll preview"),
-		keyStyle.Render("k, up") + descStyle.Render("Move cursor up / Scroll preview"),
-		keyStyle.Render("h, left") + descStyle.Render("Back to parent / Unfocus preview"),
-		keyStyle.Render("l, right") + descStyle.Render("Enter directory / Focus preview"),
-		keyStyle.Render("v, enter") + descStyle.Render("Open file in Vim"),
-		keyStyle.Render("g") + descStyle.Render("Go to top"),
-		keyStyle.Render("G") + descStyle.Render("Go to bottom"),
-		keyStyle.Render("t") + descStyle.Render("Cycle color themes"),
-		keyStyle.Render("o") + descStyle.Render("Open with system default"),
-		keyStyle.Render("?") + descStyle.Render("Show/hide this help"),
-		keyStyle.Render("q, ctrl+c") + descStyle.Render("Quit scout"),
-	}
-
-	symbols := []string{
-		keyStyle.Render("●") + descStyle.Render("Modified file"),
-		keyStyle.Render("○") + descStyle.Render("Untracked/New file"),
-		keyStyle.Render("◆") + descStyle.Render("Other git change"),
-		keyStyle.Render("▸") + descStyle.Render("Directory"),
-		keyStyle.Render("•") + descStyle.Render("Regular file"),
-	}
-
-	helpBody := lipgloss.JoinVertical(
-		lipgloss.Left,
-		header,
-		sectionStyle.Render(lipgloss.NewStyle().Foreground(dimColor).Render("─ KEYBOARD SHORTCUTS ─")),
-		lipgloss.JoinVertical(lipgloss.Left, hotkeys...),
-		sectionStyle.Render(lipgloss.NewStyle().Foreground(dimColor).Render("─ SYMBOLS ─")),
-		lipgloss.JoinVertical(lipgloss.Left, symbols...),
+	hotkeys := lipgloss.JoinVertical(lipgloss.Left,
+		sectionStyle.Render("─ keys ─"),
+		keyStyle.Render("↑/↓, j/k")   +descStyle.Render("navigate / scroll preview"),
+		keyStyle.Render("←/→, h/l")   +descStyle.Render("parent / enter or focus preview"),
+		keyStyle.Render("backspace")   +descStyle.Render("go to parent directory"),
+		keyStyle.Render("enter")       +descStyle.Render("enter directory"),
+		keyStyle.Render("v")           +descStyle.Render("open file in vim"),
+		keyStyle.Render("o")           +descStyle.Render("open with system default"),
+		keyStyle.Render("i")           +descStyle.Render("toggle hidden files"),
+		keyStyle.Render("tab")         +descStyle.Render("collapse / expand explorer"),
+		keyStyle.Render("t")           +descStyle.Render("cycle color themes"),
+		keyStyle.Render("?")           +descStyle.Render("show / hide help"),
+		keyStyle.Render("q, ctrl+c")   +descStyle.Render("quit"),
 	)
+
+	symbols := lipgloss.JoinVertical(lipgloss.Left,
+		sectionStyle.Render("─ symbols ─"),
+		keyStyle.Render("▸") +descStyle.Render("directory"),
+		keyStyle.Render("·") +descStyle.Render("clean file"),
+		keyStyle.Render("M") +descStyle.Render("git modified"),
+		keyStyle.Render("+") +descStyle.Render("git added / staged"),
+		keyStyle.Render("?") +descStyle.Render("git untracked"),
+		keyStyle.Render("!") +descStyle.Render("other git change"),
+	)
+
+	columns := lipgloss.JoinHorizontal(lipgloss.Top, colStyle.Render(hotkeys), symbols)
+
+	helpBody := lipgloss.JoinVertical(lipgloss.Left, header, columns)
 
 	return lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(accentColor).
 		Padding(1, 4).
+		MaxHeight(m.Height - 2).
 		Render(helpBody)
 }

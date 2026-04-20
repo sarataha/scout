@@ -32,5 +32,11 @@ type StatsMsg struct {
 	DirSize int64
 }
 
+// GitRefreshMsg carries updated git status and branch for the current directory.
+type GitRefreshMsg struct {
+	GitStatus map[string]string
+	GitBranch string
+}
+
 // TickMsg is sent periodically to refresh stats.
 type TickMsg struct{}

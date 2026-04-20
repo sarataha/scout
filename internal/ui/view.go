@@ -32,7 +32,9 @@ func (m Model) View() tea.View {
 	}
 
 	leftWidth := 40
-	if leftWidth > usableWidth*2/5 {
+	if m.ExplorerCollapsed {
+		leftWidth = 8
+	} else if leftWidth > usableWidth*2/5 {
 		leftWidth = usableWidth * 2 / 5
 	}
 	rightWidth := usableWidth - leftWidth
@@ -53,7 +55,7 @@ func (m Model) View() tea.View {
 	headerStyle := lipgloss.NewStyle().Foreground(accentColor).Bold(true)
 	listLines = append(listLines, headerStyle.Render(filesystem.Truncate(cwdDisplay, leftWidth-4)))
 
-	visibleRows := contentHeight - len(listLines)
+	visibleRows := contentHeight - len(listLines) - 1 // -1 for the stats line
 	if visibleRows < 1 {
 		visibleRows = 1
 	}
@@ -69,7 +71,7 @@ func (m Model) View() tea.View {
 		Background(selectedBg).
 		Bold(true).
 		Width(leftWidth - 4)
-	dirStyle     := lipgloss.NewStyle().Foreground(dirColor).Bold(true)
+	dirStyle     := lipgloss.NewStyle().Foreground(dirColor)
 	dirCountStyle := lipgloss.NewStyle().Foreground(dimColor)
 
 	for i := scrollOffset; i < len(m.Entries) && len(listLines) < contentHeight-1; i++ {
@@ -93,18 +95,24 @@ func (m Model) View() tea.View {
 				dirCountStr = "" // no room for count
 			}
 		} else {
-			symbol = "•"
-			symStyle = lipgloss.NewStyle().Foreground(textColor)
+			symbol = "·"
+			symStyle = lipgloss.NewStyle().Foreground(dimColor)
 		}
 
-		if status, ok := m.GitStatus[name]; ok {
+		if status, ok := m.GitStatus[e.Name]; ok {
 			switch status {
-			case "M", "A", "R", "C", "U", "MM", "AM":
-				symbol = "●"
+			case "M":
+				symbol = "M"
+				symStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#FFAF00"))
+			case "A", "AM":
+				symbol = "+"
+				symStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#87AF5F"))
 			case "?":
-				symbol = "○"
+				symbol = "?"
+				symStyle = lipgloss.NewStyle().Foreground(dimColor)
 			default:
-				symbol = "◆"
+				symbol = "!"
+				symStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5F5F"))
 			}
 		}
 
@@ -137,18 +145,22 @@ func (m Model) View() tea.View {
 		listLines = append(listLines, strings.Repeat(" ", leftWidth-4))
 	}
 
-	// Last line: directory stats with cursor position
-	dirStatStyle := lipgloss.NewStyle().Foreground(dimColor)
-	itemStat := fmt.Sprintf("%d items", len(m.Entries))
-	if len(m.Entries) > 0 {
-		itemStat = fmt.Sprintf("%d/%d items", m.Cursor+1, len(m.Entries))
+	// Last line: directory stats (hidden when explorer is collapsed)
+	if m.ExplorerCollapsed {
+		listLines = append(listLines, strings.Repeat(" ", leftWidth-4))
+	} else {
+		dirStatStyle := lipgloss.NewStyle().Foreground(dimColor)
+		itemStat := fmt.Sprintf("%d items", len(m.Entries))
+		if len(m.Entries) > 0 {
+			itemStat = fmt.Sprintf("%d/%d items", m.Cursor+1, len(m.Entries))
+		}
+		curFileSize := ""
+		if len(m.Entries) > 0 && m.Entries[m.Cursor].Info != nil && !m.Entries[m.Cursor].IsDir {
+			curFileSize = filesystem.HumanSize(m.Entries[m.Cursor].Info.Size()) + " / "
+		}
+		dirStatLine := dirStatStyle.Render(fmt.Sprintf(" %s  %s%s", itemStat, curFileSize, filesystem.HumanSize(m.Stats.DirSize)))
+		listLines = append(listLines, dirStatLine)
 	}
-	curFileSize := ""
-	if len(m.Entries) > 0 && m.Entries[m.Cursor].Info != nil && !m.Entries[m.Cursor].IsDir {
-		curFileSize = filesystem.HumanSize(m.Entries[m.Cursor].Info.Size()) + " / "
-	}
-	dirStatLine := dirStatStyle.Render(fmt.Sprintf(" %s  %s%s", itemStat, curFileSize, filesystem.HumanSize(m.Stats.DirSize)))
-	listLines = append(listLines, dirStatLine)
 
 	leftContent := strings.Join(listLines, "\n")
 
@@ -179,14 +191,6 @@ func (m Model) View() tea.View {
 		leftBorderColor = accentColor
 	}
 
-	leftPane := lipgloss.NewStyle().
-		Width(leftWidth).
-		Height(contentHeight + 2).
-		Border(lipgloss.RoundedBorder()).
-		BorderForeground(leftBorderColor).
-		Padding(0, 1).
-		Render(leftContent)
-
 	rightPane := lipgloss.NewStyle().
 		Width(rightWidth).
 		Height(contentHeight + 2).
@@ -194,6 +198,14 @@ func (m Model) View() tea.View {
 		BorderForeground(rightBorderColor).
 		Padding(0, 1).
 		Render(rightContent)
+
+	leftPane := lipgloss.NewStyle().
+		Width(leftWidth).
+		Height(contentHeight + 2).
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(leftBorderColor).
+		Padding(0, 1).
+		Render(leftContent)
 
 	panes := lipgloss.JoinHorizontal(lipgloss.Top, leftPane, rightPane)
 
@@ -203,7 +215,7 @@ func (m Model) View() tea.View {
 	if m.GitBranch != "" {
 		gitInfo = " ⎇ " + m.GitBranch + "  │"
 	}
-	help := " ↑/↓:nav  ←/→:focus  v:vim  o:open  t:theme  ?:help  q:quit"
+	help := " ↑/↓:nav  ←/→:focus  v:vim  o:open  i:hidden  tab:explorer  t:theme  ?:help  q:quit"
 
 	statusBar := statusStyle.Render(
 		filesystem.Truncate(gitInfo+help, m.Width),

@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"time"
+
 	tea "charm.land/bubbletea/v2"
 	"github.com/mirageglobe/scout/internal/filesystem"
 	"github.com/mirageglobe/scout/internal/git"
@@ -22,15 +24,20 @@ type Model struct {
 	ShowHelp      bool
 	ThemeIdx      int
 	GitStatus     map[string]string
+	GitBranch     string
+	ShowHidden      bool
+	ExplorerCollapsed bool
 	Stats         filesystem.Stats
 	StatusMsg     string
 	Err           error
 }
 
-// NewModel initializes a fresh UI model.
+// NewModel initializes a fresh UI model with a time-based theme.
 func NewModel(cwd string) Model {
 	return Model{
-		Cwd: cwd,
+		Cwd:        cwd,
+		ThemeIdx:   ThemeForHour(time.Now().Hour()),
+		ShowHidden: true,
 	}
 }
 
@@ -43,6 +50,16 @@ func (m Model) Init() tea.Cmd {
 	)
 }
 
+// RefreshGit is a command that re-fetches git status and branch for the current directory.
+func (m Model) RefreshGit() tea.Cmd {
+	return func() tea.Msg {
+		return filesystem.GitRefreshMsg{
+			GitStatus: git.GetStatus(m.Cwd),
+			GitBranch: git.GetBranch(m.Cwd),
+		}
+	}
+}
+
 // LoadDir is a command that reads a directory and its git status.
 func (m Model) LoadDir(path string) tea.Cmd {
 	return func() tea.Msg {
@@ -51,10 +68,12 @@ func (m Model) LoadDir(path string) tea.Cmd {
 			return filesystem.DirLoadedMsg{Err: err}
 		}
 		status := git.GetStatus(path)
+		branch := git.GetBranch(path)
 
 		return filesystem.DirLoadedMsg{
 			Entries:   entries,
 			GitStatus: status,
+			GitBranch: branch,
 		}
 	}
 }

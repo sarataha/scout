@@ -46,15 +46,19 @@ Scout is a fast, elegant, terminal-native file explorer designed for immediate s
 
 ### ◆ Getting Started
 
-Ensure you have [Go](https://go.dev/) installed, then:
+**via homebrew (recommended):**
 
 ```bash
-# clone and build
+brew tap mirageglobe/tap
+brew install scout
+```
+
+**from source:**
+
+```bash
 git clone https://github.com/mirageglobe/scout.git
 cd scout
 make build
-
-# run Scout
 ./scout
 ```
 

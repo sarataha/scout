@@ -82,6 +82,3 @@ make build
 
 ---
 
-## Known Issues
-
-- **TUI Viewport Overflow**: in some environments (notably `tmux`), the preview pane can occasionally extend beyond the bottom of the screen when viewing long files, causing the status bar to disappear. this is likely due to complex ANSI width calculations or terminal height reporting discrepancies.

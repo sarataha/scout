@@ -81,6 +81,9 @@ push-tags: ## Push local tags to origin (run after bump-patch/minor/major, befor
 release: ## Tag and release via goreleaser (requires GITHUB_TOKEN + HOMEBREW_TAP_GITHUB_TOKEN)
 	goreleaser release --clean
 
+release-reset: ## Delete existing GitHub release for current tag (use before re-running a failed release)
+	gh release delete v$(VERSION) --yes 2>/dev/null || true
+
 release-dry: ## Dry-run goreleaser release (no publish, no tag)
 	goreleaser release --snapshot --clean
 

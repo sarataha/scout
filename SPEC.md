@@ -375,6 +375,19 @@ to test the release pipeline locally without publishing:
 make release-dry
 ```
 
+### troubleshooting
+
+**release fails with `422 Validation Failed — tag_name already_exists`**
+
+this happens when a previous goreleaser run partially created a GitHub release for the same tag (e.g. interrupted mid-upload). goreleaser cannot overwrite an existing release.
+
+fix: delete the partial release(s) and re-run:
+
+```bash
+make release-reset   # deletes any existing GitHub release for the current tag
+make release
+```
+
 ---
 
 ## 11. Roadmap

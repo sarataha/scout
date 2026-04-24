@@ -30,6 +30,7 @@ Scout is a fast, elegant, terminal-native file explorer designed for immediate s
 ```bash
 brew tap mirageglobe/tap
 brew install mirageglobe/tap/scout
+brew upgrade mirageglobe/tap/scout
 ```
 
 **from source:**

@@ -8,6 +8,10 @@ versions follow [semantic versioning](https://semver.org/).
 
 ## [unreleased]
 
+---
+
+## [v0.4.0] — 2026-04-24
+
 ### added
 - persistent `scout ›` prompt in status line with state-aware messages (idle, loading, search, errors)
 - animated loading spinner (`scout › ·/··/···`) during directory navigation
@@ -16,6 +20,9 @@ versions follow [semantic versioning](https://semver.org/).
 - root-focus mode: restricts navigation to the launch directory (`f` to toggle)
 - theme preference persisted to `~/.config/scout/config`
 - homebrew release workflow via goreleaser (`make bump-patch`, `make push-tags`, `make release`)
+- `context.Context` with timeout on all blocking operations (WatchDir 5s, LoadDir 10s, RefreshGit 5s, GetStats 5s)
+- unit tests for filesystem utils, themes, and ui logic
+- `CHANGELOG.md` with backfilled history
 
 ### fixed
 - panic on `makeslice: len out of range` when preview scroll exceeded line count of newly loaded file
